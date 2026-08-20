@@ -1,6 +1,5 @@
-using System.Diagnostics;
 using System.Xml;
-using Newtonsoft.Json;
+using System.Text.Json;
 using System.Net.NetworkInformation;
 
 namespace SakerLabb.Web.Services;
@@ -31,14 +30,9 @@ public class ImportService
         return document.DocumentElement?.InnerText ?? "";
     }
 
-    public object? ImportJson(string json)
+    public JsonDocument ImportJson(string json)
     {
-        var settings = new JsonSerializerSettings
-        {
-            TypeNameHandling = TypeNameHandling.All
-        };
-
-        return JsonConvert.DeserializeObject(json, settings);
+        return JsonDocument.Parse(json);
     }
 
     public async Task<string> FetchRemote(string url)
