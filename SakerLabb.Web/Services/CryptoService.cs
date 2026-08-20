@@ -14,7 +14,7 @@ public static class CryptoService
 
     public static string HashPassword(string password)
     {
-        var bytes = MD5.HashData(Encoding.UTF8.GetBytes(password));
+        var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(password));
         return Convert.ToHexString(bytes).ToLowerInvariant();
     }
 
