@@ -95,7 +95,7 @@ public class ApiController : ControllerBase
     [HttpPost("import/json")]
     public IActionResult ImportJson([FromBody] string json)
     {
-        return Ok(_import.ImportJson(json));
+        return Content(_import.ImportJson(json), "text/plain");
     }
 
     [HttpGet("config")]
