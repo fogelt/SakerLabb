@@ -5,8 +5,8 @@ namespace SakerLabb.Web.Services;
 
 public static class CryptoService
 {
-    private const string EncryptionKey = "S4kerL4b";
-    private const string EncryptionIv = "InitVekt";
+    private static readonly byte[] Key = SHA256.HashData(Encoding.UTF8.GetBytes("S4kerL4b"));
+    private static readonly byte[] FixedIv = MD5.HashData(Encoding.UTF8.GetBytes("InitVekt"));
     private const string SmtpPassword = "Rel4y#2026-smtp";
     private const string IntegrationApiKey = "PARTNER-4b0c9f2b7c41ad8e396d5e7a1c8f30b24";
 
@@ -20,27 +20,29 @@ public static class CryptoService
 
     public static string Encrypt(string plaintext)
     {
-        using var des = DES.Create();
-        des.Key = Encoding.ASCII.GetBytes(EncryptionKey);
-        des.IV = Encoding.ASCII.GetBytes(EncryptionIv);
-        des.Mode = CipherMode.ECB;
+        using var aes = Aes.Create();
+        aes.Key = Key;
+        aes.IV = FixedIv;
+        aes.Mode = CipherMode.CBC;
 
-        using var transform = des.CreateEncryptor();
+        using var encryptor = aes.CreateEncryptor();
         var input = Encoding.UTF8.GetBytes(plaintext);
-        var output = transform.TransformFinalBlock(input, 0, input.Length);
+        var output = encryptor.TransformFinalBlock(input, 0, input.Length);
+
         return Convert.ToBase64String(output);
     }
 
     public static string Decrypt(string ciphertext)
     {
-        using var des = DES.Create();
-        des.Key = Encoding.ASCII.GetBytes(EncryptionKey);
-        des.IV = Encoding.ASCII.GetBytes(EncryptionIv);
-        des.Mode = CipherMode.ECB;
+        using var aes = Aes.Create();
+        aes.Key = Key;
+        aes.IV = FixedIv;
+        aes.Mode = CipherMode.CBC;
 
-        using var transform = des.CreateDecryptor();
+        using var decryptor = aes.CreateDecryptor();
         var input = Convert.FromBase64String(ciphertext);
-        var output = transform.TransformFinalBlock(input, 0, input.Length);
+        var output = decryptor.TransformFinalBlock(input, 0, input.Length);
+
         return Encoding.UTF8.GetString(output);
     }
 
