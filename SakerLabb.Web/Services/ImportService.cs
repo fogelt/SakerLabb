@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Xml;
 using Newtonsoft.Json;
+using System.Net.NetworkInformation;
 
 namespace SakerLabb.Web.Services;
 
@@ -49,21 +50,10 @@ public class ImportService
 
     public string Ping(string host)
     {
-        var process = new Process
-        {
-            StartInfo = new ProcessStartInfo
-            {
-                FileName = "cmd.exe",
-                Arguments = "/c ping -n 2 " + host,
-                RedirectStandardOutput = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            }
-        };
-
-        process.Start();
-        var output = process.StandardOutput.ReadToEnd();
-        process.WaitForExit(5000);
-        return output;
+        using var ping = new Ping();
+        PingReply reply = ping.Send(host, 5000);
+        return reply.Status == IPStatus.Success
+            ? $"Reply from {reply.Address}: bytes={reply.Buffer.Length} time={reply.RoundtripTime}ms"
+            : $"Ping failed: {reply.Status}";
     }
 }
