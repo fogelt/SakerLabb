@@ -19,20 +19,33 @@ public class ImportService
     {
         var settings = new XmlReaderSettings
         {
-            DtdProcessing = DtdProcessing.Parse,
-            XmlResolver = new XmlUrlResolver()
+            DtdProcessing = DtdProcessing.Prohibit,
+            XmlResolver = null
         };
 
-        var document = new XmlDocument { XmlResolver = new XmlUrlResolver() };
+        var document = new XmlDocument { XmlResolver = null };
         using var reader = XmlReader.Create(new StringReader(xml), settings);
         document.Load(reader);
 
         return document.DocumentElement?.InnerText ?? "";
     }
-
-    public JsonDocument ImportJson(string json)
+    public string ImportJson(string json)
     {
-        return JsonDocument.Parse(json);
+        if (string.IsNullOrWhiteSpace(json))
+        {
+            return "No JSON input provided.";
+        }
+
+        try
+        {
+            using var doc = JsonDocument.Parse(json);
+            var options = new JsonSerializerOptions { WriteIndented = true };
+            return JsonSerializer.Serialize(doc.RootElement, options);
+        }
+        catch (JsonException ex)
+        {
+            return $"Invalid JSON format: {ex.Message}";
+        }
     }
 
     public async Task<string> FetchRemote(string url)
@@ -47,7 +60,7 @@ public class ImportService
         using var ping = new Ping();
         PingReply reply = ping.Send(host, 5000);
         return reply.Status == IPStatus.Success
-            ? $"Reply from {reply.Address}: bytes={reply.Buffer.Length} time={reply.RoundtripTime}ms"
+            ? $"Reply: bytes={reply.Buffer.Length} time={reply.RoundtripTime}ms"
             : $"Ping failed: {reply.Status}";
     }
 }
