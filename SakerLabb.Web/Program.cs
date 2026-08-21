@@ -1,14 +1,15 @@
 using SakerLabb.Web.Components;
 using SakerLabb.Web.Data;
 using SakerLabb.Web.Services;
+using Serilog;
+using SakerLabb.Web.Infrastructure.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Logging.ClearProviders();
-builder.Logging.AddConsole();
-builder.Logging.AddDebug();
-
-builder.Logging.SetMinimumLevel(LogLevel.Information);
+builder.Host.UseSerilog((context, services, configuration) => configuration
+    .ReadFrom.Configuration(context.Configuration)
+    .Enrich.With(new LogInjectionEnricher())
+    .WriteTo.Console());
 
 builder.Services.AddRazorComponents();
 builder.Services.AddControllers();
@@ -24,7 +25,7 @@ builder.Services.AddSingleton<FileService>();
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy => policy
-        .WithOrigins("https://localhost:5080")
+        .WithOrigins("http://localhost:5080")
         .AllowAnyHeader()
         .AllowAnyMethod());
 });
