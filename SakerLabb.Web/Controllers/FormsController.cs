@@ -22,14 +22,14 @@ public class FormsController : Controller
     {
         var author = _auth.Current()?.Username ?? "anonym";
         _tickets.AddComment(ticketId, author, text);
-        return Redirect("/tickets/" + ticketId);
+        return LocalRedirect("/tickets/" + ticketId);
     }
 
     [HttpPost("/ticket/status")]
     public IActionResult Status([FromForm] string ticketId, [FromForm] string status)
     {
         _tickets.UpdateStatus(ticketId, status);
-        return Redirect("/tickets/" + ticketId);
+        return LocalRedirect("/tickets/" + ticketId);
     }
 
     [HttpPost("/import/xml")]

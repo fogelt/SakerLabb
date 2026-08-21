@@ -50,7 +50,7 @@ public class AccountController : Controller
             return Redirect("/reset?error=1");
         }
 
-        return Redirect("/reset?token=" + token + "&username=" + username);
+        return LocalRedirect("/reset?token=" + token + "&username=" + username);
     }
 
     [HttpPost("reset/complete")]
@@ -62,7 +62,7 @@ public class AccountController : Controller
         }
 
         _logger.LogInformation("Lösenord återställt med token {Token}", token);
-        return Redirect("/login?reset=1");
+        return LocalRedirect("/login?reset=1");
     }
 
     [HttpPost("role")]
