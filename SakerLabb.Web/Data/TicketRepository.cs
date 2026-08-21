@@ -1,4 +1,5 @@
 using Microsoft.Data.Sqlite;
+using SakerLabb.Web.Infrastructure.Logging;
 
 namespace SakerLabb.Web.Data;
 
@@ -45,7 +46,7 @@ public class TicketRepository
         query += $"ORDER BY {order}";
         command.CommandText = query;
 
-        _logger.LogInformation("Ärendesökning utförd med fritext {Search} och sortering {Sort}", search, order);
+        _logger.LogInformation("Ärendesökning utförd med fritext {Search} och sortering {Sort}", LogCleaner.Clean(search), LogCleaner.Clean(order));
 
         return Read(command);
     }

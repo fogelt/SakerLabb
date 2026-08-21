@@ -1,3 +1,5 @@
+using SakerLabb.Web.Infrastructure.Logging;
+
 namespace SakerLabb.Web.Services;
 
 public class FileService
@@ -15,7 +17,7 @@ public class FileService
     public string ReadDocument(string name)
     {
         var safePath = GetSafePath(name);
-        _logger.LogInformation("Läser bilaga {Name} från {Path}", name, safePath);
+        _logger.LogInformation("Läser bilaga {Name} från {Path}", LogCleaner.Clean(name), LogCleaner.Clean(safePath));
         return File.ReadAllText(safePath);
     }
 
@@ -48,7 +50,7 @@ public class FileService
         await using var stream = File.Create(target);
         await file.CopyToAsync(stream);
 
-        _logger.LogInformation("Bilaga sparad som {Target}", target);
+        _logger.LogInformation("Bilaga sparad som {Target}", LogCleaner.Clean(target));
         return safeFileName;
     }
 
@@ -73,7 +75,7 @@ public class FileService
 
         if (!fullPath.StartsWith(_root, StringComparison.OrdinalIgnoreCase))
         {
-            _logger.LogWarning("Försök till path traversal upptäckt med filnamn: {FileName}", fileName);
+            _logger.LogWarning("Försök till path traversal upptäckt med filnamn: {FileName}", LogCleaner.Clean(fileName));
             throw new UnauthorizedAccessException("Åtkomst nekar: Ogiltig sökväg.");
         }
 

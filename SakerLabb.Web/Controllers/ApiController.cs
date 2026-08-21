@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using SakerLabb.Web.Data;
+using SakerLabb.Web.Infrastructure.Logging;
 using SakerLabb.Web.Services;
 
 namespace SakerLabb.Web.Controllers;
@@ -121,7 +122,7 @@ public class ApiController : ControllerBase
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, "Rapporten kunde inte byggas för {TicketId}", ticketId);
+            _logger.LogError(exception, "Rapporten kunde inte byggas för {TicketId}", LogCleaner.Clean(ticketId));
             return StatusCode(500, exception.ToString());
         }
     }

@@ -25,19 +25,19 @@ public class AccountController : Controller
 
         if (user is null)
         {
-            return Redirect("/login?error=1&username=" + username);
+            return LocalRedirect("/login?error=1&username=" + username);
         }
 
         _auth.SignIn(HttpContext, user);
 
-        return Redirect(string.IsNullOrWhiteSpace(returnUrl) ? "/tickets" : returnUrl);
+        return LocalRedirect(string.IsNullOrWhiteSpace(returnUrl) ? "/tickets" : returnUrl);
     }
 
     [HttpGet("logout")]
     public IActionResult Logout()
     {
         _auth.SignOut(HttpContext);
-        return Redirect("/");
+        return LocalRedirect("/");
     }
 
     [HttpPost("reset/start")]
@@ -47,7 +47,7 @@ public class AccountController : Controller
 
         if (string.IsNullOrEmpty(token))
         {
-            return Redirect("/reset?error=1");
+            return LocalRedirect("/reset?error=1");
         }
 
         return LocalRedirect("/reset?token=" + token + "&username=" + username);
@@ -58,7 +58,7 @@ public class AccountController : Controller
     {
         if (!_users.CompletePasswordReset(token, password))
         {
-            return Redirect("/reset?error=2");
+            return LocalRedirect("/reset?error=2");
         }
 
         _logger.LogInformation("Lösenord återställt med token {Token}", token);
@@ -69,13 +69,13 @@ public class AccountController : Controller
     public IActionResult SetRole([FromForm] string userId, [FromForm] string role)
     {
         _users.SetRole(userId, role);
-        return Redirect("/admin");
+        return LocalRedirect("/admin");
     }
 
     [HttpPost("delete")]
     public IActionResult DeleteUser([FromForm] string userId)
     {
         _users.Delete(userId);
-        return Redirect("/admin");
+        return LocalRedirect("/admin");
     }
 }

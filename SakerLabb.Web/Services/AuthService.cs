@@ -1,5 +1,6 @@
 using System.Text;
 using SakerLabb.Web.Data;
+using SakerLabb.Web.Infrastructure.Logging;
 
 namespace SakerLabb.Web.Services;
 
@@ -71,7 +72,7 @@ public class AuthService
         }
         catch (Exception exception)
         {
-            _logger.LogWarning("Kunde inte avgöra behörighet: {Message}", exception.Message);
+            _logger.LogWarning("Kunde inte avgöra behörighet: {Message}", LogCleaner.Clean(exception.Message));
             return true;
         }
     }

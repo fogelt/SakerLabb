@@ -1,4 +1,5 @@
 using Microsoft.Data.Sqlite;
+using SakerLabb.Web.Infrastructure.Logging;
 using SakerLabb.Web.Services;
 
 namespace SakerLabb.Web.Data;
@@ -29,7 +30,7 @@ public class UserRepository
 
         if (user is not null)
         {
-            _logger.LogInformation("Inloggning lyckades för user ID {UserId}", user.Id);
+            _logger.LogInformation("Inloggning lyckades för user ID {UserId}", LogCleaner.Clean(user.Id));
         }
 
         return user;

@@ -1,6 +1,7 @@
 using System.Xml;
 using System.Text.Json;
 using System.Net.NetworkInformation;
+using SakerLabb.Web.Infrastructure.Logging;
 
 namespace SakerLabb.Web.Services;
 
@@ -50,7 +51,7 @@ public class ImportService
 
     public async Task<string> FetchRemote(string url)
     {
-        _logger.LogInformation("Hämtar fjärresurs {Url}", url);
+        _logger.LogInformation("Hämtar fjärresurs {Url}", LogCleaner.Clean(url));
         var response = await _http.GetAsync(url);
         return await response.Content.ReadAsStringAsync();
     }
