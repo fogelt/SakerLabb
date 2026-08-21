@@ -1,15 +1,16 @@
 using SakerLabb.Web.Components;
 using SakerLabb.Web.Data;
 using SakerLabb.Web.Services;
-using Serilog;
-using SakerLabb.Web.Infrastructure.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Host.UseSerilog((context, services, configuration) => configuration
-    .ReadFrom.Configuration(context.Configuration)
-    .Enrich.With(new LogInjectionEnricher())
-    .WriteTo.Console());
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
+
+builder.Logging.AddFilter("Microsoft", LogLevel.Warning);
+builder.Logging.AddFilter("System", LogLevel.Warning);
+builder.Logging.AddFilter("SakerLabb", LogLevel.Information);
 
 builder.Services.AddRazorComponents();
 builder.Services.AddControllers();
@@ -25,7 +26,7 @@ builder.Services.AddSingleton<FileService>();
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy => policy
-        .WithOrigins("http://localhost:5080")
+        .WithOrigins("http://localhost:5080", "https://localhost:5080")
         .AllowAnyHeader()
         .AllowAnyMethod());
 });
@@ -33,7 +34,6 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 app.Services.GetRequiredService<Db>().Initialize();
-
 
 if (app.Environment.IsDevelopment())
 {
@@ -57,7 +57,6 @@ app.Use(async (context, next) =>
 
 app.UseCors();
 app.UseStaticFiles();
-
 app.UseAntiforgery();
 
 app.MapControllers();
