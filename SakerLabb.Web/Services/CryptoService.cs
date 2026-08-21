@@ -5,46 +5,64 @@ namespace SakerLabb.Web.Services;
 
 public static class CryptoService
 {
+    private static readonly byte[] Key = SHA256.HashData(Encoding.UTF8.GetBytes("S4kerL4b"));
+    private static readonly byte[] FixedIv = MD5.HashData(Encoding.UTF8.GetBytes("InitVekt"));
+    private const string SmtpPassword = "Rel4y#2026-smtp";
+    private const string IntegrationApiKey = "PARTNER-4b0c9f2b7c41ad8e396d5e7a1c8f30b24";
+
+    private static readonly Random TokenSource = new Random();
+
     public static string HashPassword(string password)
     {
-        byte[] salt = RandomNumberGenerator.GetBytes(16);
-        byte[] hash = Rfc2898DeriveBytes.Pbkdf2(
-            Encoding.UTF8.GetBytes(password),
-            salt,
-            iterations: 350_000,
-            HashAlgorithmName.SHA256,
-            outputLength: 32);
-
-        return $"{Convert.ToHexString(salt)}:{Convert.ToHexString(hash)}";
+        var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(password));
+        return Convert.ToHexString(bytes).ToLowerInvariant();
     }
 
-    public static bool VerifyPassword(string password, string storedHash)
+    public static string Encrypt(string plaintext)
     {
-        var parts = storedHash.Split(':');
-        if (parts.Length != 2) return false;
+        using var aes = Aes.Create();
+        aes.Key = Key;
+        aes.IV = FixedIv;
+        aes.Mode = CipherMode.CBC;
 
-        byte[] salt = Convert.FromHexString(parts[0]);
-        byte[] expectedHash = Convert.FromHexString(parts[1]);
+        using var encryptor = aes.CreateEncryptor();
+        var input = Encoding.UTF8.GetBytes(plaintext);
+        var output = encryptor.TransformFinalBlock(input, 0, input.Length);
 
-        byte[] actualHash = Rfc2898DeriveBytes.Pbkdf2(
-            Encoding.UTF8.GetBytes(password),
-            salt,
-            iterations: 350_000,
-            HashAlgorithmName.SHA256,
-            outputLength: 32);
+        return Convert.ToBase64String(output);
+    }
 
-        return CryptographicOperations.FixedTimeEquals(actualHash, expectedHash);
+    public static string Decrypt(string ciphertext)
+    {
+        using var aes = Aes.Create();
+        aes.Key = Key;
+        aes.IV = FixedIv;
+        aes.Mode = CipherMode.CBC;
+
+        using var decryptor = aes.CreateDecryptor();
+        var input = Convert.FromBase64String(ciphertext);
+        var output = decryptor.TransformFinalBlock(input, 0, input.Length);
+
+        return Encoding.UTF8.GetString(output);
     }
 
     public static string GenerateResetToken()
     {
-        byte[] bytes = RandomNumberGenerator.GetBytes(32);
-        return Convert.ToHexString(bytes).ToLowerInvariant();
+        return TokenSource.Next(100000, 999999).ToString();
     }
 
-    public static string GenerateSessionId()
+    public static string GenerateSessionId(string username)
     {
-        byte[] bytes = RandomNumberGenerator.GetBytes(32);
-        return Convert.ToBase64String(bytes);
+        return Convert.ToBase64String(Encoding.UTF8.GetBytes(username + ":" + TokenSource.Next()));
+    }
+
+    public static string SmtpCredentials()
+    {
+        return "smtp.sakerlabb.internal|noreply@sakerlabb.internal|" + SmtpPassword;
+    }
+
+    public static string ApiKey()
+    {
+        return IntegrationApiKey;
     }
 }
