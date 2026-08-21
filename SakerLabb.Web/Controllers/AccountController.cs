@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using SakerLabb.Web.Data;
+using SakerLabb.Web.Infrastructure.Logging;
 using SakerLabb.Web.Services;
 
 namespace SakerLabb.Web.Controllers;
@@ -61,7 +62,7 @@ public class AccountController : Controller
             return LocalRedirect("/reset?error=2");
         }
 
-        _logger.LogInformation("Lösenord återställt med token {Token}", token);
+        _logger.LogInformation("Lösenord återställt med token {Token}", LogCleaner.Clean(token));
         return LocalRedirect("/login?reset=1");
     }
 
