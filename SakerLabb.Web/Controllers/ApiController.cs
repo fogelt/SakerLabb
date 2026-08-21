@@ -104,10 +104,7 @@ public class ApiController : ControllerBase
     {
         return Ok(new
         {
-            environment = "Production",
-            database = "Data Source=sakerlabb.db",
-            smtp = CryptoService.SmtpCredentials(),
-            integrationKey = CryptoService.ApiKey(),
+            status = "Healthy",
             build = "SakerLabb 1.4.2"
         });
     }
