@@ -1,9 +1,14 @@
-using Microsoft.Extensions.FileProviders;
 using SakerLabb.Web.Components;
 using SakerLabb.Web.Data;
 using SakerLabb.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
+
+builder.Logging.SetMinimumLevel(LogLevel.Information);
 
 builder.Services.AddRazorComponents();
 builder.Services.AddControllers();
@@ -19,7 +24,7 @@ builder.Services.AddSingleton<FileService>();
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy => policy
-        .AllowAnyOrigin()
+        .WithOrigins("https://localhost:5080")
         .AllowAnyHeader()
         .AllowAnyMethod());
 });
@@ -28,24 +33,29 @@ var app = builder.Build();
 
 app.Services.GetRequiredService<Db>().Initialize();
 
-app.UseDeveloperExceptionPage();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
+else
+{
+    app.UseExceptionHandler("/error");
+    app.UseHsts();
+}
+
+app.UseHttpsRedirection();
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 
 app.Use(async (context, next) =>
 {
-    context.Response.Headers["X-Powered-By"] = "SakerLabb 1.4.2 (ASP.NET Core 10.0)";
-    context.Response.Headers["X-Backend-Node"] = Environment.MachineName;
+    context.Response.Headers.Remove("X-Powered-By");
+    context.Response.Headers.Remove("Server");
     await next();
 });
 
 app.UseCors();
-
 app.UseStaticFiles();
-app.UseDirectoryBrowser(new DirectoryBrowserOptions
-{
-    FileProvider = new PhysicalFileProvider(Path.Combine(builder.Environment.WebRootPath, "files")),
-    RequestPath = "/files"
-});
 
 app.UseAntiforgery();
 
